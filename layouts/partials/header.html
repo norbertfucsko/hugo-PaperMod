@@ -47,7 +47,8 @@
             <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
                 {{- if site.Params.label.icon }}
                 {{- $img := resources.Get site.Params.label.icon }}
-                {{- if $img }}
+                {{- $darkImg := resources.Get site.Params.label.darkIcon }}
+                {{- if and $img $darkImg }}
                     {{- $processableFormats := (slice "jpg" "jpeg" "png" "tif" "bmp" "gif") -}}
                     {{- if hugo.IsExtended -}}
                         {{- $processableFormats = $processableFormats | append "webp" -}}
@@ -56,15 +57,21 @@
                     {{- if and (in $processableFormats $img.MediaType.SubType) (eq $prod true)}}
                         {{- if site.Params.label.iconHeight }}
                             {{- $img = $img.Resize (printf "x%d" site.Params.label.iconHeight) }}
+                            {{- $darkImg = $darkImg.Resize (printf "x%d" site.Params.label.iconHeight) }}
                         {{ else }}
                             {{- $img = $img.Resize "x30" }}
+                            {{- $darkImg = $darkImg.Resize "x30" }}
                         {{- end }}
                     {{- end }}
-                    <img src="{{ $img.Permalink }}" alt="" aria-label="logo"
+                    <img src="{{ $img.Permalink }}" alt="" aria-label="logo" class="light-mode-icon"
                         height="{{- site.Params.label.iconHeight | default "30" -}}">
+                    <img src="{{ $darkImg.Permalink }}" alt="" aria-label="logo" class="dark-mode-icon"
+                        height="{{- site.Params.label.iconHeight | default "30" -}}" style="display: none;">
                 {{- else }}
-                <img src="{{- site.Params.label.icon | absURL -}}" alt="" aria-label="logo"
+                <img src="{{- site.Params.label.icon | absURL -}}" alt="" aria-label="logo" class="light-mode-icon"
                     height="{{- site.Params.label.iconHeight | default "30" -}}">
+                <img src="{{- site.Params.label.darkIcon | absURL -}}" alt="" aria-label="logo" class="dark-mode-icon"
+                    height="{{- site.Params.label.iconHeight | default "30" -}}" style="display: none;">
                 {{- end -}}
                 {{- else if hasPrefix site.Params.label.iconSVG "<svg" }}
                     {{ site.Params.label.iconSVG | safeHTML }}
@@ -144,6 +151,44 @@
                 </a>
             </li>
             {{- end }}
+            <!-- Modified GitHub icon -->
+            <li class="github-icon">
+                <a href="https://github.com/fucskonorbi" title="GitHub" target="_blank" rel="noopener noreferrer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                </a>
+            </li>
         </ul>
     </nav>
 </header>
+
+<script>
+    function updateIcon() {
+        const isDarkMode = document.body.classList.contains('dark');
+        const lightIcon = document.querySelector('.light-mode-icon');
+        const darkIcon = document.querySelector('.dark-mode-icon');
+        
+        if (isDarkMode) {
+            lightIcon.style.display = 'none';
+            darkIcon.style.display = 'inline';
+        } else {
+            lightIcon.style.display = 'inline';
+            darkIcon.style.display = 'none';
+        }
+    }
+
+    // Run on page load
+    updateIcon();
+
+    // Run when theme changes
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                updateIcon();
+            }
+        });
+    });
+
+    observer.observe(document.body, { attributes: true });
+</script>
