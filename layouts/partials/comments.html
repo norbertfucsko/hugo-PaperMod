@@ -1,3 +1,8 @@
 {{- /* Comments area start */ -}}
-{{ template "_internal/disqus.html" . }}
+{{- /* Only show comments if explicitly enabled for the page */ -}}
+{{- if not .Params.noComments }}
+    <div class="disqus-container">
+        {{ template "_internal/disqus.html" . }}
+    </div>
+{{- end }}
 {{- /* Comments area end */ -}}
